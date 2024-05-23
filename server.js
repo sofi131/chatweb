@@ -19,9 +19,17 @@ app.get("/login", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-    console.log(req.body);
-    res.send("procesando login");
-})
+    const { email, password } = req.body;
+    if (email === "admin@gmail.com" && password === "1234") {
+        res.redirect("/juego");
+    } else {
+
+    }
+});
+
+app.get("/juego", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'juego.html'));
+});
 
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);

@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-//const { random } = require('lodash');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
@@ -14,6 +13,11 @@ app.use(express.static('public'));
 
 app.get("/login", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
+})
+
+app.post("/login", (req, res) => {
+    console.log(req);
+    res.send("procesando login");
 })
 
 server.listen(PORT, () => {

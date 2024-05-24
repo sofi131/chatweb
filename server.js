@@ -2,7 +2,8 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const mongoose = require('mongoose');
+const mongoose = require("mongoose")
+const User = require('./models/user');
 
 const PORT = process.env.PORT || 3000;
 
@@ -18,20 +19,19 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('public'));
 
-//Conectar a mongo db
+// Conectar a MongoDB
 mongoose.connect('mongodb://localhost:27017/tresenraya')
     .then(() => {
         console.log('Conectado a MongoDB');
-    })
-    .catch((err) => {
-        console.error('Error al conectar a MongoDB:', err);
+    }).catch(err => {
+        console.error('Error al conectar a MongoDB', err);
     });
+
 
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     let error = "";
     res.render('login', { error });
-
 })
 
 app.post("/login", (req, res) => {
@@ -46,6 +46,20 @@ app.post("/login", (req, res) => {
 
 app.get("/juego", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
+})
+
+app.get("/newuser", async (req, res) => {
+    let name = "Lolo";
+    let email = "lolo@gmail.com";
+    let password = "1234";
+    let usuario = new User({ name, email, password });
+    try {
+        usuario.save();
+        res.send("Usuario grabado " + usuario.name);
+    } catch (error) {
+        console.log(error);
+        res.send("error");
+    }
 })
 
 server.listen(PORT, () => {

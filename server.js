@@ -4,6 +4,8 @@ const socketIo = require('socket.io');
 const path = require('path');
 const mongoose = require("mongoose")
 const User = require('./models/user');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +21,17 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('public'));
 
+// Configurar el middleware de sesión con connect-mongo
+app.use(session({
+    secret: 'mysecret', // Cambia esto por una cadena secreta segura
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: 'mongodb://localhost:27017/tresenraya',
+        collectionName: 'sessions'
+    })
+}));
+
 // Conectar a MongoDB
 mongoose.connect('mongodb://localhost:27017/tresenraya')
     .then(() => {
@@ -27,7 +40,7 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
         console.error('Error al conectar a MongoDB', err);
     });
 
-//Login
+
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     let error = "";
@@ -46,34 +59,34 @@ app.post("/login", async (req, res) => {
         if (!isMatch) {
             return res.render('login', { error: 'Usuario o contraseña incorrecto' });
         }
-
+        req.session.user=user;
         res.redirect('/juego');
     } catch (error) {
         console.error(error);
         res.render('login', { error: 'Error de conexion a la base de datos' });
     }
-});
-//Juego
+
+})
+
 app.get("/juego", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
 })
-//Register
-app.get("/register", (req, res) => {
-    let error = "";
-    res.render("register", { error });
+app.get("/register",(req,res)=>{
+    let error="";
+    res.render("register",{error}); 
 })
 
 app.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
+    const {name,email,password}=req.body;
     let usuario = new User({ name, email, password });
     try {
         await usuario.save();
         res.redirect("/login");
-    } catch (error) {
-        res.render("register", { error: "Error de conexion a bbdd" });
+    } catch (error) {      
+        res.render("register",{error:"Error de conexion a bbdd"});
     }
 })
-//Puerto
+
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

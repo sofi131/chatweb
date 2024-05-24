@@ -27,7 +27,7 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
         console.error('Error al conectar a MongoDB', err);
     });
 
-
+//Login
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     let error = "";
@@ -43,28 +43,27 @@ app.post("/login", (req, res) => {
 
     }
 })
-
+//Juego
 app.get("/juego", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
 })
-//Registro get
-app.get("/register",(req,res) =>{
-    let error="";
+//Register
+app.get("/register", (req, res) => {
+    let error = "";
     res.render("register", { error });
 })
-//Registro post
+
 app.post("/register", async (req, res) => {
     const { name, email, password } = req.body;
     let usuario = new User({ name, email, password });
     try {
-        usuario.save();
-        res.send("/login");
+        await usuario.save();
+        res.redirect("/login");
     } catch (error) {
-        //console.log(error);
-        res.render("register", { error });
+        res.render("register", { error: "Error de conexion a bbdd" });
     }
 })
-
+//Puerto
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

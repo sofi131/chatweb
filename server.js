@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const PORT = process.env.PORT || 3000;
 
@@ -17,24 +18,33 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('public'));
 
+//Conectar a mongo db
+mongoose.connect('mongodb://localhost:27017/tresenraya')
+    .then(() => {
+        console.log('Conectado a MongoDB');
+    })
+    .catch((err) => {
+        console.error('Error al conectar a MongoDB:', err);
+    });
+
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
-    let error="";
-    res.render('login',{error});
+    let error = "";
+    res.render('login', { error });
 
 })
 
 app.post("/login", (req, res) => {
-    const {email,password}=req.body;
-    if(email=="admin@gmail.com" & password=="1234"){
+    const { email, password } = req.body;
+    if (email == "admin@gmail.com" & password == "1234") {
         res.redirect("/juego");
-    }else{
-        res.render('login', { error: 'Usuario o password incorrecta'});
+    } else {
+        res.render('login', { error: 'Usuario o password incorrecta' });
 
     }
 })
 
-app.get("/juego",(req,res)=>{
+app.get("/juego", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
 })
 

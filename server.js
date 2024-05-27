@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configura el motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+let usuarios=[];
 
 app.use(express.static('public'));
 
@@ -33,7 +34,7 @@ const session_middleware=session({
     })});
 app.use(session_middleware);
 
-// Conectar a MongoDB.................................................................................
+// Conectar a MongoDB{_id,name}
 mongoose.connect('mongodb://localhost:27017/tresenraya')
     .then(() => {
         console.log('Conectado a MongoDB');
@@ -41,7 +42,6 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
         console.error('Error al conectar a MongoDB', err);
     });
 
-//Socket-----------------------------------------------------------------------------------------------
 //Socket
 //Socket Session
 io.use((socket,next)=>{
@@ -51,7 +51,8 @@ io.use((socket,next)=>{
 io.on('connection', (socket) => {
         console.log("Nuevo cliente conectado" + socket.id);
         const {_id,name}=socket.request.session.user;
-        io.emit("mensaje",{_id,name});
+        usuarios.push({_id,name})
+        io.emit("mensaje",usuarios);
 
 
         socket.on('disconnect',()=>{
@@ -64,7 +65,7 @@ io.on('connection', (socket) => {
         })
 })
 
-//login...............................................................................................
+
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     const error = req.query.error || '';;
@@ -83,7 +84,7 @@ app.post("/login", async (req, res) => {
         if (!isMatch) {
             return res.render('login', { error: 'Usuario o contraseña incorrecto' });
         }
-        req.session.user = user;
+        req.session.user=user;
         res.redirect('/juego');
     } catch (error) {
         console.error(error);
@@ -91,25 +92,26 @@ app.post("/login", async (req, res) => {
     }
 
 })
-//register_____________________________________________________________________________________________
-app.get("/register", (req, res) => {
-    let error = "";
-    res.render("register", { error });
+
+app.get("/register",(req,res)=>{
+    let error="";
+    res.render("register",{error}); 
 })
 
 app.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
+    const {name,email,password}=req.body;
     let usuario = new User({ name, email, password });
     try {
         await usuario.save();
         res.redirect("/login");
-    } catch (error) {
-        res.render("register", { error: "Error de conexion a bbdd" });
+    } catch (error) {      
+        res.render("register",{error:"Error de conexion a bbdd"});
     }
 })
-//juego...................................................................................................
-app.get("/juego", isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'juego.html'));
+
+app.get("/juego", isAuthenticated,(req, res) => {
+    let {_id,name}=req.session.user;
+    res.render("juego",{_id,name});
 })
 
 server.listen(PORT, () => {

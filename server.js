@@ -47,9 +47,6 @@ io.on("connection",(socket)=>{
     console.log(socket);
 })
 
-
-
-
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     const error = req.query.error || '';;

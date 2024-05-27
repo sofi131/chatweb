@@ -41,6 +41,14 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
         console.error('Error al conectar a MongoDB', err);
     });
 
+//Socket
+//parte del servidor
+io.on("connection",(socket)=>{
+    console.log(socket);
+})
+
+
+
 
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));

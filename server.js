@@ -33,7 +33,7 @@ app.use(session({
     })
 }));
 
-// Conectar a MongoDB
+// Conectar a MongoDB.................................................................................
 mongoose.connect('mongodb://localhost:27017/tresenraya')
     .then(() => {
         console.log('Conectado a MongoDB');
@@ -46,12 +46,13 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
 io.on("connection", (socket) => {
     console.log("Nuevo cliente conectado" + socket.id);
     io.emit("mensaje", "Nuevo cliente conectado");
-    
+
     socket.on('disconnect', () => {
         console.log("Cliente desconectado");
     })
 
     socket.on('mensaje', (mensaje) => {
+        //broadcast para todos los clientes se supone
         io.emit('mensaje', mensaje);
     })
 });
@@ -82,7 +83,7 @@ app.post("/login", async (req, res) => {
     }
 
 })
-
+//register_____________________________________________________________________________________________
 app.get("/register", (req, res) => {
     let error = "";
     res.render("register", { error });
@@ -98,7 +99,7 @@ app.post("/register", async (req, res) => {
         res.render("register", { error: "Error de conexion a bbdd" });
     }
 })
-
+//juego...................................................................................................
 app.get("/juego", isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
 })

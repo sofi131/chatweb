@@ -41,12 +41,21 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
         console.error('Error al conectar a MongoDB', err);
     });
 
-//Socket
-//parte del servidor
-io.on("connection",(socket)=>{
-    console.log(socket);
-})
+//Socket-----------------------------------------------------------------------------------------------
+// Parte del servidor
+io.on("connection", (socket) => {
+    console.log("Nuevo cliente conectado" + socket.id);
+    io.emit("mensaje", "Nuevo cliente conectado");
+    
+    socket.on('disconnect', () => {
+        console.log("Cliente desconectado");
+    })
 
+    socket.on('mensaje', (mensaje) => {
+        io.emit('mensaje', mensaje);
+    })
+});
+//login...............................................................................................
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));
     const error = req.query.error || '';;
@@ -65,7 +74,7 @@ app.post("/login", async (req, res) => {
         if (!isMatch) {
             return res.render('login', { error: 'Usuario o contraseña incorrecto' });
         }
-        req.session.user=user;
+        req.session.user = user;
         res.redirect('/juego');
     } catch (error) {
         console.error(error);
@@ -74,23 +83,23 @@ app.post("/login", async (req, res) => {
 
 })
 
-app.get("/register",(req,res)=>{
-    let error="";
-    res.render("register",{error}); 
+app.get("/register", (req, res) => {
+    let error = "";
+    res.render("register", { error });
 })
 
 app.post("/register", async (req, res) => {
-    const {name,email,password}=req.body;
+    const { name, email, password } = req.body;
     let usuario = new User({ name, email, password });
     try {
         await usuario.save();
         res.redirect("/login");
-    } catch (error) {      
-        res.render("register",{error:"Error de conexion a bbdd"});
+    } catch (error) {
+        res.render("register", { error: "Error de conexion a bbdd" });
     }
 })
 
-app.get("/juego", isAuthenticated,(req, res) => {
+app.get("/juego", isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'juego.html'));
 })
 

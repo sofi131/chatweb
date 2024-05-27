@@ -23,15 +23,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
 // Configurar el middleware de sesión con connect-mongo
-app.use(session({
+const session_middleware=session({
     secret: 'mysecret', // Cambia esto por una cadena secreta segura
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: 'mongodb://localhost:27017/tresenraya',
         collectionName: 'sessions'
-    })
-}));
+    })});
+app.use(session_middleware);
 
 // Conectar a MongoDB.................................................................................
 mongoose.connect('mongodb://localhost:27017/tresenraya')
@@ -43,19 +43,27 @@ mongoose.connect('mongodb://localhost:27017/tresenraya')
 
 //Socket-----------------------------------------------------------------------------------------------
 // Parte del servidor
-io.on("connection", (socket) => {
-    console.log("Nuevo cliente conectado" + socket.id);
-    io.emit("mensaje", "Nuevo cliente conectado");
 
-    socket.on('disconnect', () => {
-        console.log("Cliente desconectado");
-    })
-
-    socket.on('mensaje', (mensaje) => {
-        //broadcast para todos los clientes se supone
-        io.emit('mensaje', mensaje);
-    })
+//Socket Session
+io.use((socket,next)=>{
+    session_middleware(socket.request,socket.request.next||{},next);
 });
+
+io.on('connection', (socket) => {
+        console.log("Nuevo cliente conectado" + socket.id);
+        io.emit("mensaje","Nuevo cliente conectado "+socket.request.session.user.name);
+
+
+        socket.on('disconnect',()=>{
+            console.log("Se ha desconectado un cliente")
+        })
+
+        socket.on('mensaje', (mensaje) => {
+            console.log(mensaje);
+            socket.broadcast.emit('mensaje', mensaje);
+        })
+})
+
 //login...............................................................................................
 app.get("/login", (req, res) => {
     //res.sendFile(path.join(__dirname, 'public', 'login.html'));

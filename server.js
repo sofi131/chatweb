@@ -79,11 +79,12 @@ io.on('connection', (socket) => {
     socket.on('invitaciones', async (datos) => {
         let player1 = _id;
         let player2 = datos.userId;
+        let estado = 'pendiente';
 
-        let partida = new Partida({ player1, player2 });
+        let partida = new Partida({ player1, player2, estado });
         try {
             await partida.save();
-            io.to(datos.socketID).emit("privados", "Invitación pendiente de " + name)
+            io.to(datos.socketID).emit("privados", { partida, name })
             console.log(partida)
         } catch (error) {
             console.log(error)

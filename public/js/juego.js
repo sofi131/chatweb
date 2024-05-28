@@ -13,6 +13,12 @@ socket.on('privados', (datos) => {
     const p = document.createElement('p');
     p.innerText = datos;
     document.getElementById("chatprivado").appendChild(p);
+    //Creo partida pendiente
+    const li = document.createElement('li');
+    li.textContent = "partida de" + datos.name;
+    li.classList.add('list-group-item');
+    document.getElementById("partidasPendientes").appendChild(li);
+
 })
 socket.on('usuarios', (datos) => {
     connectedUsers.innerHTML = "";

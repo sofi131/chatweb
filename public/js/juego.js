@@ -1,30 +1,37 @@
 const socket = io();
 let connectedUsers = document.getElementById("connectedUsers");
-let messagesDiv = document.getElementById("messages");
+socket.on('pendientes', (datos) => {
+    console.log(datos);
+})
 
-// Maneja el evento 'usuarios' emitido por el servidor
-socket.on('usuarios', (usuarios) => {
+socket.on('mensaje', (datos) => {
+    const p = document.createElement('p');
+    p.innerText = datos.name + ": " + datos.mensaje;
+    document.getElementById("chatgeneral").appendChild(p);
+})
+socket.on('usuarios', (datos) => {
     connectedUsers.innerHTML = "";
-    usuarios.forEach(user => {
+    datos.forEach(user => {
         if (!document.getElementById(user._id)) {
             const li = document.createElement('li');
-            li.id = user._id;
+            li.id = user.socketId;
             li.textContent = user.name;
+            li.classList.add('list-group-item');
+            li.onclick = (e) => {
+                alert(e.currentTarget.id)
+                socket.emit("invitaciones", e.currentTarget.id);
+            }
             connectedUsers.appendChild(li);
         }
     });
-});
 
-// Maneja el evento 'mensaje' emitido por el servidor
-socket.on('mensaje', (mensaje) => {
-    const { _id, name, message } = mensaje;
-    const messageDiv = document.createElement('div');
-    messageDiv.textContent = `${name}: ${message}`;
-    messagesDiv.appendChild(messageDiv);
-});
 
-// Maneja el clic en el botón de enviar mensaje
+    //console.log(datos);
+})
+
+
 document.getElementById("btnEnviar").onclick = () => {
-    const texto = document.getElementById("texto").value;
+    let texto = document.getElementById("texto").value;
+    document.getElementById("texto").value = "";
     socket.emit("mensaje", texto);
-};
+}
